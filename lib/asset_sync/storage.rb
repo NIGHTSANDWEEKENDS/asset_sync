@@ -39,7 +39,7 @@ module AssetSync
         if File.exists?(self.config.manifest_path)
           yml = YAML.load(IO.read(self.config.manifest_path))
           log "Using: Manifest #{self.config.manifest_path}"
-          return yml.values.map { |f| File.join(self.config.assets_prefix, f) }
+          return yml.keys.map { |f| File.join(self.config.assets_prefix, f) }
         else
           log "Warning: manifest.yml not found at #{self.config.manifest_path}"
         end
@@ -83,8 +83,8 @@ module AssetSync
         :key => f,
         :body => File.open("#{path}/#{f}"),
         :public => true,
-        :cache_control => "public, max-age=31557600",
-        :expires => CGI.rfc1123_date(Time.now + 1.year)
+        :cache_control => "public, max-age=3600",
+        :expires => CGI.rfc1123_date(Time.now + 1.hour)
       }
 
       gzipped = "#{path}/#{f}.gz"
@@ -123,12 +123,12 @@ module AssetSync
 
     def upload_files
       # get a fresh list of remote files
-      remote_files = get_remote_files
+      #remote_files = get_remote_files
       # fixes: https://github.com/rumblelabs/asset_sync/issues/19
-      local_files_to_upload = local_files - remote_files
+      #local_files_to_upload = local_files - remote_files
 
       # Upload new files
-      local_files_to_upload.each do |f|
+      local_files.each do |f|
         next unless File.file? "#{path}/#{f}" # Only files.
         upload_file f
       end
